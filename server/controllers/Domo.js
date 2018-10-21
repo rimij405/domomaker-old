@@ -1,9 +1,9 @@
 // Create actions.
 const makerPage = (req, res) => {
-    res.render('app');
+  res.render('app');
 };
 
 // Export actions.
 module.exports = {
-    makerPage
+  makerPage,
 };
