@@ -13,10 +13,14 @@ const signupPage = (req, res) => {
 };
 
 const logout = (req, res) => {
+  req.session.destroy();
   res.redirect('/');
 };
 
 const login = (req, res) => {
+  // Create internal parameters so no parameter reassign.
+  const request = req;
+
    // Cast to string to avoid security issues.
   const username = `${req.body.username}`;
   const password = `${req.body.pass}`;
@@ -29,6 +33,8 @@ const login = (req, res) => {
     if (err || !account) {
       return res.status(400).json({ error: 'Wrong username or password.' });
     }
+
+    request.session.account = Account.AccountModel.toAPI(account);
 
     return res.json({ redirect: '/maker' });
   });
@@ -62,7 +68,10 @@ const signup = (req, res) => {
 
     const savePromise = newAccount.save();
 
-    savePromise.then(() => res.json({ redirect: '/maker' }));
+    savePromise.then(() => {
+      request.session.account = Account.AccountModel.toAPI(newAccount);
+      res.json({ redirect: '/maker' });
+    });
 
     savePromise.catch((err) => {
       console.log(err);
