@@ -28,12 +28,12 @@ mongoose.connect(db, (err) => {
 
 let redisURL = {
   hostname: 'localhost',
-  port: 6379
+  port: 6379,
 };
 
 let redisPASS;
 
-if(process.env.REDISCLOUD_URL) {
+if (process.env.REDISCLOUD_URL) {
   redisURL = url.parse(process.env.REDISCLOUD_URL);
   redisPASS = redisURL.auth.split(':')[1];
 }
@@ -57,14 +57,14 @@ app.use(session({
   store: new RedisStore({
     host: redisURL.hostname,
     port: redisURL.port,
-    pass: redisPASS
+    pass: redisPASS,
   }),
   secret: 'iae2784 - Domo Arigato',
   resave: 'true',
   saveUninitialized: true,
   cookie: {
-    httpOnly: true
-  }
+    httpOnly: true,
+  },
 }));
 
 // Set up view engine and views.
@@ -76,7 +76,7 @@ app.use(cookieParser());
 // has to come after app.use(cookieParser());
 app.use(csurf());
 app.use((err, req, res, next) => {
-  if(err.code !== 'EBADCSRFTOKEN') return next(err);
+  if (err.code !== 'EBADCSRFTOKEN') return next(err);
   console.log('Missing CSRF token');
   return false;
 });
