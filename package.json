@@ -31,7 +31,6 @@
   "author": "Ian Effendi",
   "license": "ISC",
   "dependencies": {
-    "babel-preset-react": "^6.24.1",
     "body-parser": "^1.15.0",
     "compression": "^1.6.1",
     "connect-redis": "^3.0.2",
@@ -49,8 +48,9 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "babel-cli": "^6.18.0",
+    "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.1.8",
+    "babel-preset-react": "^6.24.1",
     "eslint": "^2.13.1",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.1",

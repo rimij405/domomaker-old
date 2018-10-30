@@ -1,78 +1,130 @@
-"use strict";
-
-var handleError = function handleError(message) {
-  $("#errorMessage").text(message);
-  $("#domoMessage").animate({ width: 'toggle' }, 350);
-};
-
-var sendAjax = function sendAjax(action, data) {
-  $.ajax({
-    cache: false,
-    type: "POST",
-    url: action,
-    data: data,
-    dataType: "json",
-    success: function success(result, status, xhr) {
-      $("#domoMessage").animate({ width: 'hide' }, 350);
-
-      window.location = result.redirect;
-    },
-    error: function error(xhr, status, _error) {
-      var messageObj = JSON.parse(xhr.responseText);
-
-      handleError(messageObj.error);
-    }
-  });
-};
-
-$(document).ready(function () {
-  $("#signupForm").on("submit", function (e) {
-    e.preventDefault();
-
-    $("#domoMessage").animate({ width: 'hide' }, 350);
-
-    if ($("#user").val() == '' || $("#pass").val() == '' || $("#pass2").val() == '') {
-      handleError("RAWR! All fields are required");
-      return false;
-    }
-
-    if ($("#pass").val() !== $("#pass2").val()) {
-      handleError("RAWR! Passwords do not match");
-      return false;
-    }
-
-    sendAjax($("#signupForm").attr("action"), $("#signupForm").serialize());
-
-    return false;
-  });
-
-  $("#loginForm").on("submit", function (e) {
-    e.preventDefault();
-
-    $("#domoMessage").animate({ width: 'hide' }, 350);
-
-    if ($("#user").val() == '' || $("#pass").val() == '') {
-      handleError("RAWR! Username or password is empty");
-      return false;
-    }
-
-    sendAjax($("#loginForm").attr("action"), $("#loginForm").serialize());
-
-    return false;
-  });
-
-  $("#domoForm").on("submit", function (e) {
+const handleDomo = e => {
     e.preventDefault();
 
     $("#domoMessage").animate({ width: 'hide' }, 350);
 
     if ($("#domoName").val() == '' || $("#domoAge").val() == '') {
-      handleError("RAWR! All fields are required");
-      return false;
-    }
+        handleError("RAWR: All fields are required.");
+        return false;
+    };
 
-    sendAjax($("#domoForm").attr("action"), $("#domoForm").serialize());
+    sendAjax('POST', $("#domoForm").attr("action"), $("#domoForm").serialize(), function () {
+        loadDomosFromServer();
+    });
 
     return false;
-  });
+};
+
+const DomoForm = props => {
+    return React.createElement(
+        "form",
+        { id: "domoForm", name: "domoForm",
+            onSubmit: handleDomo,
+            action: "/maker",
+            method: "POST",
+            className: "domoForm"
+        },
+        React.createElement(
+            "label",
+            { htmlFor: "name" },
+            "Name: "
+        ),
+        React.createElement("input", { id: "domoName", type: "text", name: "name", placeholder: "Domo Name" }),
+        React.createElement(
+            "label",
+            { htmlFor: "age" },
+            "Age: "
+        ),
+        React.createElement("input", { id: "domoAge", type: "text", name: "age", placeholder: "Domo Age" }),
+        React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+        React.createElement("input", { className: "makeDomoSubmit", type: "submit", value: "Make Domo" })
+    );
+};
+
+const DomoList = function (props) {
+    if (props.domos.length === 0) {
+        return React.createElement(
+            "div",
+            { className: "domoList" },
+            React.createElement(
+                "h3",
+                { className: "emptyDomo" },
+                "No Domos yet"
+            )
+        );
+    }
+
+    const domoNodes = props.domos.map(function (domo) {
+        return React.createElement(
+            "div",
+            { key: domo._id, className: "domo" },
+            React.createElement("img", { src: "/assets/img/domoFace.jpeg", alt: "domo face", className: "domoFace" }),
+            React.createElement(
+                "h3",
+                { className: "domoName" },
+                "Name: ",
+                domo.name
+            ),
+            React.createElement(
+                "h3",
+                { className: "domoAge" },
+                "Age: ",
+                domo.age
+            )
+        );
+    });
+
+    return React.createElement(
+        "div",
+        { className: "domoList" },
+        domoNodes
+    );
+};
+
+const loadDomosFromServer = () => {
+    sendAjax('GET', '/getDomos', null, data => {
+        ReactDOM.render(React.createElement(DomoList, { domos: data.domos }), document.querySelector("#domos"));
+    });
+};
+
+const setup = function (csrf) {
+    ReactDOM.render(React.createElement(DomoForm, { csrf: csrf }), document.querySelector("#makeDomo"));
+
+    ReactDOM.render(React.createElement(DomoList, { domos: [] }), document.querySelecctor("#domos"));
+
+    loadDomosFromServer();
+};
+
+const getToken = () => {
+    sendAjax('GET', '/getToken', null, result => {
+        setup(result.csrfToken);
+    });
+};
+
+$(document).ready(function () {
+    getToken();
 });
+const handleError = message => {
+    $("#errorMessage").text(message);
+    $("#domoMessage").animate({ width: 'toggle' }, 350);
+};
+
+const redirect = response => {
+    $("#domoMessage").animate({ width: 'hide' }, 350);
+    window.location = response.redirect;
+};
+
+const sendAjax = (type, action, data, success) => {
+    $.ajax({
+        cache: false,
+        type: type,
+        url: action,
+        data: data,
+        dataType: 'json',
+        success: success,
+        error: function (xhr, status, error) {
+            var messageObj = JSON.parse(xhr.responseText);
+            handleError(messageObj.error);
+        }
+    });
+};
