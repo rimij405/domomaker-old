@@ -8,7 +8,7 @@ const getToken = (req, res) => {
   const response = res;
 
   const csrfJSON = {
-    csrfToken: request.csrfToken()
+    csrfToken: request.csrfToken(),
   };
 
   response.json(csrfJSON);
@@ -98,5 +98,5 @@ module.exports = {
   login,
   logout,
   signup,
-  getToken
+  getToken,
 };
