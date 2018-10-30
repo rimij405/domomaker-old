@@ -1,5 +1,6 @@
 const handleDomo = e => {
     e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
 
     $("#domoMessage").animate({ width: 'hide' }, 350);
 
@@ -19,7 +20,7 @@ const DomoForm = props => {
     return React.createElement(
         "form",
         { id: "domoForm", name: "domoForm",
-            onSubmit: handleDomo,
+            onSubmit: e => handleDomo(e),
             action: "/maker",
             method: "POST",
             className: "domoForm"
@@ -90,7 +91,7 @@ const loadDomosFromServer = () => {
 const setup = function (csrf) {
     ReactDOM.render(React.createElement(DomoForm, { csrf: csrf }), document.querySelector("#makeDomo"));
 
-    ReactDOM.render(React.createElement(DomoList, { domos: [] }), document.querySelecctor("#domos"));
+    ReactDOM.render(React.createElement(DomoList, { domos: [] }), document.querySelector("#domos"));
 
     loadDomosFromServer();
 };

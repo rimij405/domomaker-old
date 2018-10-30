@@ -1,9 +1,11 @@
 const handleLogin = e => {
     e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
 
     $("#domoMessage").animate({ width: 'hide' }, 350);
 
     if ($("#user").val() == '' || $("#pass").val() == '') {
+        console.log("err");
         handleError("RAWR: Username or password is empty!");
         return false;
     }
@@ -17,6 +19,7 @@ const handleLogin = e => {
 
 const handleSignup = e => {
     e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
 
     $("#domoMessage").animate({ width: 'hide' }, 350);
 
@@ -39,7 +42,7 @@ const LoginWindow = props => {
     return React.createElement(
         "form",
         { id: "loginForm", name: "loginForm",
-            onsubmit: handleLogin,
+            onSubmit: handleLogin,
             action: "/login",
             method: "POST",
             className: "mainForm"
@@ -65,7 +68,7 @@ const SignupWindow = props => {
     return React.createElement(
         "form",
         { id: "signupForm", name: "signupForm",
-            onsubmit: handleSignup,
+            onSubmit: handleSignup,
             action: "/signup",
             method: "POST",
             className: "mainForm"
