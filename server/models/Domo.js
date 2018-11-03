@@ -59,7 +59,7 @@ DomoSchema.statics.findByOwner = (ownerId, callback) => {
 
 DomoSchema.statics.findByIdAndDelete = (domoId, callback) => {
   const search = {
-    _id: convertId(domoId)
+    _id: convertId(domoId),
   };
 
   return DomoModel.deleteOne(search).exec(callback);

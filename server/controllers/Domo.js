@@ -23,7 +23,7 @@ const makeDomo = (req, res) => {
     name: req.body.name,
     age: req.body.age,
     food: req.body.food,
-    owner: req.session.account._id
+    owner: req.session.account._id,
   };
 
   const newDomo = new Domo.DomoModel(domoData);
@@ -45,15 +45,17 @@ const makeDomo = (req, res) => {
 };
 
 const deleteDomo = (req, res) => {
-  if(!req.body._id) {
-    return res.status(400).json({ error: "RAWR! ID required to delete this domo." });
-  };
+  if (!req.body._id) {
+    return res.status(400).json({ error: 'RAWR! ID required to delete this domo.' });
+  }
 
   return Domo.DomoModel.findByIdAndDelete(req.body._id, (err) => {
-    if(err) {
+    if (err) {
       console.log(err);
-      return res.status(400).json({ error: `An error occured while deleting Domo ${req.body._id}.`});
-    };
+      return res.status(400).json({
+        error: `An error occured while deleting Domo ${req.body._id}.`,
+      });
+    }
 
     return res.json({ redirect: '/maker' });
   });
