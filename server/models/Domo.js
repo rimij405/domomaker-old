@@ -5,7 +5,10 @@ const _ = require('underscore');
 let DomoModel = {};
 
 const convertId = mongoose.Types.ObjectId;
+
+// Setters.
 const setName = (name) => _.escape(name).trim();
+const setFood = (food) => _.escape(food).trim();
 
 const DomoSchema = new mongoose.Schema({
   name: {
@@ -19,6 +22,13 @@ const DomoSchema = new mongoose.Schema({
     type: Number,
     min: 0,
     required: true,
+  },
+
+  food: {
+    type: String,
+    required: true,
+    trim: true,
+    set: setFood,
   },
 
   owner: {
@@ -36,6 +46,7 @@ const DomoSchema = new mongoose.Schema({
 DomoSchema.statics.toAPI = (doc) => ({
   name: doc.name,
   age: doc.age,
+  food: doc.food,
 });
 
 DomoSchema.statics.findByOwner = (ownerId, callback) => {
@@ -43,7 +54,15 @@ DomoSchema.statics.findByOwner = (ownerId, callback) => {
     owner: convertId(ownerId),
   };
 
-  return DomoModel.find(search).select('name age').exec(callback);
+  return DomoModel.find(search).select('name age food').exec(callback);
+};
+
+DomoSchema.statics.findByIdAndDelete = (domoId, callback) => {
+  const search = {
+    _id: convertId(domoId)
+  };
+
+  return DomoModel.deleteOne(search).exec(callback);
 };
 
 DomoModel = mongoose.model('Domo', DomoSchema);

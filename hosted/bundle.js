@@ -1,16 +1,29 @@
-const handleDomo = e => {
+const handleDomo = (e, csrf) => {
     e.preventDefault();
     e.nativeEvent.stopImmediatePropagation();
 
     $("#domoMessage").animate({ width: 'hide' }, 350);
 
-    if ($("#domoName").val() == '' || $("#domoAge").val() == '') {
+    if ($("#domoName").val() == '' || $("#domoAge").val() == '' || $("#domoFood").val() == '') {
         handleError("RAWR: All fields are required.");
         return false;
     };
 
     sendAjax('POST', $("#domoForm").attr("action"), $("#domoForm").serialize(), function () {
-        loadDomosFromServer();
+        loadDomosFromServer(csrf);
+    });
+
+    return false;
+};
+
+const handleDomoDelete = (e, formID, csrf) => {
+    e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
+
+    $("#domoMessage").animate({ width: 'hide' }, 350);
+
+    sendAjax('POST', $(formID).attr("action"), $(formID).serialize(), function () {
+        loadDomosFromServer(csrf);
     });
 
     return false;
@@ -20,7 +33,7 @@ const DomoForm = props => {
     return React.createElement(
         "form",
         { id: "domoForm", name: "domoForm",
-            onSubmit: e => handleDomo(e),
+            onSubmit: e => handleDomo(e, props.csrf),
             action: "/maker",
             method: "POST",
             className: "domoForm"
@@ -33,12 +46,33 @@ const DomoForm = props => {
         React.createElement("input", { id: "domoName", type: "text", name: "name", placeholder: "Domo Name" }),
         React.createElement(
             "label",
+            { htmlFor: "food" },
+            "Food: "
+        ),
+        React.createElement("input", { id: "domoFood", type: "text", name: "food", placeholder: "Domo Favorite Food" }),
+        React.createElement(
+            "label",
             { htmlFor: "age" },
             "Age: "
         ),
         React.createElement("input", { id: "domoAge", type: "text", name: "age", placeholder: "Domo Age" }),
         React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
         React.createElement("input", { className: "makeDomoSubmit", type: "submit", value: "Make Domo" })
+    );
+};
+
+const DomoDelete = function (props) {
+    return React.createElement(
+        "form",
+        { id: `domoDelete-${props._id}`,
+            name: `domoDelete-${props._id}`,
+            onSubmit: e => handleDomoDelete(e, `#domoDelete-${props._id}`, props.csrf),
+            action: "/delete",
+            method: "POST",
+            className: "domoDelete" },
+        React.createElement("input", { type: "hidden", id: props._id, name: "_id", value: props._id }),
+        React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+        React.createElement("input", { className: "deleteDomoSubmit", type: "submit", value: "Delete Domo" })
     );
 };
 
@@ -68,10 +102,17 @@ const DomoList = function (props) {
             ),
             React.createElement(
                 "h3",
+                { className: "domoFood" },
+                "Favorite Food: ",
+                domo.food
+            ),
+            React.createElement(
+                "h3",
                 { className: "domoAge" },
                 "Age: ",
                 domo.age
-            )
+            ),
+            React.createElement(DomoDelete, { _id: domo._id, csrf: props.csrf })
         );
     });
 
@@ -82,18 +123,18 @@ const DomoList = function (props) {
     );
 };
 
-const loadDomosFromServer = () => {
+const loadDomosFromServer = csrf => {
     sendAjax('GET', '/getDomos', null, data => {
-        ReactDOM.render(React.createElement(DomoList, { domos: data.domos }), document.querySelector("#domos"));
+        ReactDOM.render(React.createElement(DomoList, { domos: data.domos, csrf: csrf }), document.querySelector("#domos"));
     });
 };
 
 const setup = function (csrf) {
     ReactDOM.render(React.createElement(DomoForm, { csrf: csrf }), document.querySelector("#makeDomo"));
 
-    ReactDOM.render(React.createElement(DomoList, { domos: [] }), document.querySelector("#domos"));
+    ReactDOM.render(React.createElement(DomoList, { domos: [], csrf: csrf }), document.querySelector("#domos"));
 
-    loadDomosFromServer();
+    loadDomosFromServer(csrf);
 };
 
 const getToken = () => {
